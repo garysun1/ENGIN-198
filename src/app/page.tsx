@@ -8,6 +8,28 @@ import StatusBar from '@/components/StatusBar';
 import LogPanel from '@/components/LogPanel';
 import type { GraphNode, QueryResponse, GraphUpdateEvent, LogEntry } from '@/types';
 
+const STORAGE_KEY = 'komori:activity-log';
+const MAX_ENTRIES = 50;
+
+function loadEntries(): LogEntry[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as (Omit<LogEntry, 'timestamp'> & { timestamp: string })[];
+    return parsed.map((e) => ({ ...e, timestamp: new Date(e.timestamp) }));
+  } catch {
+    return [];
+  }
+}
+
+function saveEntries(entries: LogEntry[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  } catch {
+    // storage full or unavailable — silently skip
+  }
+}
+
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [highlightIds, setHighlightIds] = useState<Set<string>>(new Set());
@@ -16,7 +38,14 @@ export default function Home() {
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const entryCounter = useRef(0);
 
-  // Single SSE connection for log + status
+  // Load persisted entries on mount
+  useEffect(() => {
+    const saved = loadEntries();
+    setLogEntries(saved);
+    entryCounter.current = saved.length;
+  }, []);
+
+  // SSE — append new entries and persist
   useEffect(() => {
     const es = new EventSource('/api/events');
     es.onmessage = (event) => {
@@ -32,7 +61,11 @@ export default function Home() {
         source: update.source ?? 'unknown',
       };
 
-      setLogEntries((prev) => [entry, ...prev].slice(0, 50));
+      setLogEntries((prev) => {
+        const next = [entry, ...prev].slice(0, MAX_ENTRIES);
+        saveEntries(next);
+        return next;
+      });
       setIngestCount((c) => c + 1);
     };
     return () => es.close();
