@@ -36,6 +36,7 @@ export default function Home() {
   const [glowIds, setGlowIds] = useState<Set<string>>(new Set());
   const [ingestCount, setIngestCount] = useState(0);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [graphKey, setGraphKey] = useState(0);
   const entryCounter = useRef(0);
 
   // Load persisted entries on mount
@@ -76,12 +77,23 @@ export default function Home() {
     setGlowIds(new Set());
   }, []);
 
+  const handleReset = useCallback(() => {
+    setLogEntries([]);
+    setHighlightIds(new Set());
+    setGlowIds(new Set());
+    setSelectedNode(null);
+    setIngestCount(0);
+    setGraphKey((k) => k + 1);
+    entryCounter.current = 0;
+  }, []);
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <StatusBar ingestCount={ingestCount} />
+      <StatusBar ingestCount={ingestCount} onReset={handleReset} />
 
       <div className="flex flex-1 overflow-hidden relative">
         <GraphPanel
+          key={graphKey}
           highlightIds={highlightIds}
           glowIds={glowIds}
           onNodeClick={setSelectedNode}
