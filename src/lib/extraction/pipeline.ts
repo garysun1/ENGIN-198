@@ -95,7 +95,7 @@ export async function processRawDocument(doc: RawDocument): Promise<PipelineResu
     }
   }
 
-  // 4. Generate and store embeddings
+  // 4. Generate and store embeddings (skipped if OPENAI_API_KEY not set)
   for (const entity of extracted.entities) {
     try {
       const text = buildEmbedText({
@@ -106,7 +106,7 @@ export async function processRawDocument(doc: RawDocument): Promise<PipelineResu
           : undefined,
       });
       const embedding = await generateEmbedding(text);
-      await storeEmbedding(entity.id, embedding);
+      if (embedding) await storeEmbedding(entity.id, embedding);
     } catch (err) {
       console.error(`[pipeline] Embedding failed for ${entity.id}:`, err);
     }

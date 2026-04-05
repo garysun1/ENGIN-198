@@ -21,7 +21,7 @@ export async function extractEntities(doc: RawDocument): Promise<ExtractionResul
       prompt,
       // User turn: empty — all context is in the system prompt
       'Extract entities and relationships from the content above.',
-      { temperature: 0.1, maxTokens: 2048 }
+      { temperature: 0.1, maxTokens: 4096 }
     );
 
     // Normalise: ensure arrays exist

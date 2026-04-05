@@ -128,7 +128,7 @@ export async function retrieve(query: string, topK = 10): Promise<RetrievedNode[
   const embedding = await generateEmbedding(query);
 
   const [vectorResults, textResults] = await Promise.all([
-    vectorSearch(embedding, topK),
+    embedding ? vectorSearch(embedding, topK) : Promise.resolve([]),
     fullTextSearch(query),
   ]);
 

@@ -25,7 +25,7 @@ export async function startSlackListener(): Promise<void> {
       });
 
       const result = await processRawDocument(rawDoc);
-      eventBus.emitUpdate(result);
+      eventBus.emitUpdate({ ...result, source: 'slack', timestamp: new Date().toISOString() });
       console.log(`[slack] Processed ${rawDoc.sourceId}: +${result.nodesCreated} nodes`);
     } catch (err) {
       console.error('[slack] Error processing message:', err);

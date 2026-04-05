@@ -14,7 +14,7 @@ export function startGitHubPoller(owner: string, repo: string): void {
       for (const doc of docs) {
         const result = await processRawDocument(doc);
         if (result.nodesCreated > 0) {
-          eventBus.emitUpdate(result);
+          eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString() });
           console.log(`[github] Processed ${doc.sourceId}: +${result.nodesCreated} nodes`);
         }
       }

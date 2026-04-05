@@ -4,26 +4,37 @@ import type { GraphUpdateEvent } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const encoder = new TextEncoder();
+  let cleanup: (() => void) | null = null;
+
   const stream = new ReadableStream({
     start(controller) {
-      const encoder = new TextEncoder();
-
       const send = (data: GraphUpdateEvent) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        } catch {
+          // controller already closed
+        }
       };
 
-      // Heartbeat every 30 s to keep the connection alive through proxies
       const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(': heartbeat\n\n'));
+        try {
+          controller.enqueue(encoder.encode(': heartbeat\n\n'));
+        } catch {
+          clearInterval(heartbeat);
+        }
       }, 30_000);
 
       eventBus.onUpdate(send);
 
-      // Return cleanup fn (called when client disconnects)
-      return () => {
+      // cancel() is the correct cleanup hook — start()'s return value is ignored
+      cleanup = () => {
         eventBus.offUpdate(send);
         clearInterval(heartbeat);
       };
+    },
+    cancel() {
+      cleanup?.();
     },
   });
 

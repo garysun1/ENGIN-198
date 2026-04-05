@@ -15,10 +15,11 @@ const NODE_COLORS: Record<string, string> = {
 
 interface Props {
   highlightIds?: Set<string>;
+  glowIds?: Set<string>;
   onNodeClick?: (node: GraphNode) => void;
 }
 
-export default function GraphPanel({ highlightIds = new Set(), onNodeClick }: Props) {
+export default function GraphPanel({ highlightIds = new Set(), glowIds = new Set(), onNodeClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
   const [loading, setLoading] = useState(true);
@@ -131,6 +132,19 @@ export default function GraphPanel({ highlightIds = new Set(), onNodeClick }: Pr
             linkDirectionalArrowRelPos={1}
             onNodeClick={(node: any) => onNodeClick?.(node as GraphNode)}
             cooldownTicks={80}
+            nodeCanvasObjectMode={() => 'before'}
+            nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D) => {
+              if (!glowIds.has(node.id)) return;
+              const r = 14;
+              const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r);
+              gradient.addColorStop(0, 'rgba(255, 255, 255, 0.55)');
+              gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
+              gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+              ctx.fillStyle = gradient;
+              ctx.fill();
+            }}
           />
         )}
       </div>

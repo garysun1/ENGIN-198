@@ -92,4 +92,15 @@ export interface GraphUpdateEvent {
   nodesCreated: number;
   edgesCreated: number;
   nodeIds: string[];
+  source?: 'slack' | 'github';
+  timestamp?: string; // ISO string
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: Date;
+  nodesCreated: number;
+  edgesCreated: number;
+  nodeIds: string[];
+  source: 'slack' | 'github' | 'unknown';
 }
