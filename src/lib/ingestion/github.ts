@@ -211,5 +211,27 @@ export async function fetchRecentGitHubDocs(
     });
   }
 
+  // Recent commits
+  const { data: commits } = await octokit.rest.repos.listCommits({
+    owner,
+    repo,
+    since: sinceStr,
+    per_page: 20,
+  });
+
+  for (const c of commits) {
+    const commitDate = new Date(c.commit.author?.date ?? Date.now());
+    if (commitDate <= since) continue;
+    docs.push({
+      source: 'github',
+      sourceId: `commit-${c.sha.slice(0, 7)}`,
+      sourceUrl: c.html_url,
+      docType: 'commit',
+      content: `Commit ${c.sha.slice(0, 7)}: ${c.commit.message}`,
+      author: c.author?.login ?? c.commit.author?.name ?? null,
+      createdAt: commitDate,
+    });
+  }
+
   return docs;
 }

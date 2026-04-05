@@ -9,13 +9,15 @@ export function startGitHubPoller(owner: string, repo: string): void {
   const poll = async () => {
     try {
       const since = await getLatestTimestamp('github');
+      console.log(`[github] Polling since ${since.toISOString()}`);
       const docs = await fetchRecentGitHubDocs(owner, repo, since);
+      console.log(`[github] Found ${docs.length} new doc(s)`);
 
       for (const doc of docs) {
         const result = await processRawDocument(doc);
+        console.log(`[github] ${doc.sourceId}: +${result.nodesCreated} nodes, +${result.edgesCreated} edges`);
         if (result.nodesCreated > 0) {
           eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString() });
-          console.log(`[github] Processed ${doc.sourceId}: +${result.nodesCreated} nodes`);
         }
       }
     } catch (err) {
