@@ -13,12 +13,12 @@ export function startGitHubPoller(owner: string, repo: string): void {
 
       for (const doc of docs) {
         const result = await processRawDocument(doc);
+        const label = doc.content.replace(/^Commit [a-f0-9]+:\s*/i, '').split('\n')[0].slice(0, 80);
         if (result.nodesCreated > 0) {
-          // Strip leading "Commit abc1234: " prefix for commits, use first line otherwise
-          const label = doc.content.replace(/^Commit [a-f0-9]+:\s*/i, '').split('\n')[0].slice(0, 80);
           console.log(`[github] Processed ${doc.sourceId}: +${result.nodesCreated} nodes, +${result.edgesCreated} edges`);
-          eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString(), label });
         }
+        // Always emit so the activity log captures every picked-up doc
+        eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString(), label });
       }
     } catch (err) {
       console.error('[github] Poller error:', err);

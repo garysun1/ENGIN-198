@@ -149,6 +149,7 @@ export default function GraphPanel({ highlightIds = new Set(), glowIds = new Set
             nodeCanvasObjectMode={() => 'before'}
             nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D) => {
               if (!glowIds.has(node.id)) return;
+              if (!isFinite(node.x) || !isFinite(node.y)) return;
               const r = 14;
               const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r);
               gradient.addColorStop(0, 'rgba(255, 255, 255, 0.55)');

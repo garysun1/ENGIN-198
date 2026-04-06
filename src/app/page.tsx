@@ -51,7 +51,7 @@ export default function Home() {
     const es = new EventSource('/api/events');
     es.onmessage = (event) => {
       const update: GraphUpdateEvent = JSON.parse(event.data);
-      if (update.nodesCreated === 0) return;
+      if (!update.label && update.nodesCreated === 0) return;
 
       const entry: LogEntry = {
         id: String(entryCounter.current++),
