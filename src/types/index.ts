@@ -94,6 +94,7 @@ export interface GraphUpdateEvent {
   nodeIds: string[];
   source?: 'slack' | 'github';
   timestamp?: string; // ISO string
+  label?: string; // human-readable summary of the source document
 }
 
 export interface LogEntry {
@@ -103,4 +104,5 @@ export interface LogEntry {
   edgesCreated: number;
   nodeIds: string[];
   source: 'slack' | 'github' | 'unknown';
+  label?: string;
 }

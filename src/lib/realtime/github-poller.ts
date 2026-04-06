@@ -9,15 +9,15 @@ export function startGitHubPoller(owner: string, repo: string): void {
   const poll = async () => {
     try {
       const since = await getLatestTimestamp('github');
-      console.log(`[github] Polling since ${since.toISOString()}`);
       const docs = await fetchRecentGitHubDocs(owner, repo, since);
-      console.log(`[github] Found ${docs.length} new doc(s)`);
 
       for (const doc of docs) {
         const result = await processRawDocument(doc);
-        console.log(`[github] ${doc.sourceId}: +${result.nodesCreated} nodes, +${result.edgesCreated} edges`);
         if (result.nodesCreated > 0) {
-          eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString() });
+          // Strip leading "Commit abc1234: " prefix for commits, use first line otherwise
+          const label = doc.content.replace(/^Commit [a-f0-9]+:\s*/i, '').split('\n')[0].slice(0, 80);
+          console.log(`[github] Processed ${doc.sourceId}: +${result.nodesCreated} nodes, +${result.edgesCreated} edges`);
+          eventBus.emitUpdate({ ...result, source: 'github', timestamp: new Date().toISOString(), label });
         }
       }
     } catch (err) {
@@ -26,5 +26,5 @@ export function startGitHubPoller(owner: string, repo: string): void {
   };
 
   setInterval(poll, POLL_INTERVAL_MS);
-  console.log(`[github] Poller started for ${owner}/${repo} (every ${POLL_INTERVAL_MS / 1000}s)`);
+  console.log(`[github] Poller started for ${owner}/${repo}`);
 }

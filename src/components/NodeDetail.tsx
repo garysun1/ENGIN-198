@@ -48,7 +48,18 @@ export default function NodeDetail({ node, onClose }: Props) {
           <p className="text-xs text-gray-300 leading-relaxed">{node.description}</p>
         )}
 
-        {node.raw_content && (
+        {node.type === 'Document' && node.raw_content && (
+          <div>
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+              Commit message
+            </p>
+            <p className="text-xs text-gray-400 leading-relaxed line-clamp-5">
+              {node.raw_content.replace(/^Commit [a-f0-9]+:\s*/i, '')}
+            </p>
+          </div>
+        )}
+
+        {node.type !== 'Document' && node.raw_content && (
           <div>
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
               Source

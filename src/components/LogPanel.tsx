@@ -61,9 +61,11 @@ export default function LogPanel({ entries, onHover, onLeave }: Props) {
                       {timeAgo(entry.timestamp)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
-                    {entry.source}
-                  </p>
+                  {entry.label && (
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                      {entry.label}
+                    </p>
+                  )}
                 </div>
               </li>
             ))}

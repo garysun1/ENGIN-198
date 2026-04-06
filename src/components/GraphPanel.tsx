@@ -35,7 +35,7 @@ export default function GraphPanel({ highlightIds = new Set(), glowIds = new Set
 
   const fetchGraph = useCallback(async () => {
     try {
-      const res = await fetch('/api/graph');
+      const res = await fetch('/api/graph', { cache: 'no-store' });
       const data: GraphData = await res.json();
       setGraphData(data);
     } catch {
@@ -93,9 +93,17 @@ export default function GraphPanel({ highlightIds = new Set(), glowIds = new Set
         ))}
       </div>
 
-      {/* Node count */}
-      <div className="absolute top-3 right-3 z-10 text-xs text-gray-500">
-        {filteredData.nodes.length} nodes · {filteredData.links.length} edges
+      {/* Node count + refresh */}
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        <span className="text-xs text-gray-500">
+          {filteredData.nodes.length} nodes · {filteredData.links.length} edges
+        </span>
+        <button
+          onClick={fetchGraph}
+          className="text-xs text-gray-500 hover:text-gray-200 px-2 py-0.5 rounded bg-gray-800/60 hover:bg-gray-700 transition-colors"
+        >
+          ↻
+        </button>
       </div>
 
       {loading && (
@@ -118,7 +126,13 @@ export default function GraphPanel({ highlightIds = new Set(), glowIds = new Set
             width={containerRef.current.clientWidth}
             height={containerRef.current.clientHeight}
             backgroundColor="#030712"
-            nodeLabel={(node: any) => `${node.type}: ${node.name}`}
+            nodeLabel={(node: any) => {
+              if (node.type === 'Document' && node.raw_content) {
+                const msg = node.raw_content.replace(/^Commit [a-f0-9]+:\s*/i, '').split('\n')[0];
+                return `${node.name}: ${msg}`;
+              }
+              return `${node.type}: ${node.name}`;
+            }}
             nodeColor={(node: any) =>
               highlightIds.has(node.id)
                 ? '#ffffff'

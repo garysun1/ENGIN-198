@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'komori:activity-log';
+const STORAGE_KEY = 'backtrace:activity-log';
 
 interface Props {
   ingestCount: number;
@@ -40,7 +40,7 @@ export default function StatusBar({ ingestCount, onReset }: Props) {
 
   return (
     <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-800 bg-gray-950 text-xs text-gray-500">
-      <span className="font-semibold text-gray-200 text-sm">Kōmori</span>
+      <span className="font-semibold text-gray-200 text-sm">Backtrace</span>
 
       <div className="flex items-center gap-1.5">
         <span

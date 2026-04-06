@@ -8,7 +8,7 @@ import StatusBar from '@/components/StatusBar';
 import LogPanel from '@/components/LogPanel';
 import type { GraphNode, QueryResponse, GraphUpdateEvent, LogEntry } from '@/types';
 
-const STORAGE_KEY = 'komori:activity-log';
+const STORAGE_KEY = 'backtrace:activity-log';
 const MAX_ENTRIES = 50;
 
 function loadEntries(): LogEntry[] {
@@ -60,6 +60,7 @@ export default function Home() {
         edgesCreated: update.edgesCreated,
         nodeIds: update.nodeIds,
         source: update.source ?? 'unknown',
+        label: update.label,
       };
 
       setLogEntries((prev) => {

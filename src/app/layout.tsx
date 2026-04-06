@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Kōmori — Team Memory Graph',
+  title: 'Backtrace — Team Memory Graph',
   description: 'Live knowledge graph for your team',
 };
 

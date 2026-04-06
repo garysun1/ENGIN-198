@@ -25,11 +25,25 @@ export async function startSlackListener(): Promise<void> {
       });
 
       const result = await processRawDocument(rawDoc);
-      eventBus.emitUpdate({ ...result, source: 'slack', timestamp: new Date().toISOString() });
+      const label = rawDoc.content.split('\n')[0].slice(0, 80);
+      eventBus.emitUpdate({ ...result, source: 'slack', timestamp: new Date().toISOString(), label });
       console.log(`[slack] Processed ${rawDoc.sourceId}: +${result.nodesCreated} nodes`);
     } catch (err) {
       console.error('[slack] Error processing message:', err);
     }
+  });
+
+  socketClient.on('error', (err: Error) => {
+    console.error('[slack] Socket error:', err.message);
+  });
+
+  socketClient.on('unable_to_socket_mode_start', (err: Error) => {
+    console.error('[slack] Unable to start Socket Mode:', err.message);
+  });
+
+  // Suppress unhandled disconnect events — the client reconnects automatically
+  socketClient.on('disconnect', () => {
+    console.log('[slack] Disconnected, reconnecting...');
   });
 
   await socketClient.start();
